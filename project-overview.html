@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OS&D Weekly Missing Report — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-deep: #080b10; --bg-page: #0f1318; --bg-card: #1c2230; --bg-input: #131720;
+      --border: #404858; --border-hi: #505a6e;
+      --text-1: #e6edf3; --text-2: #c8d4e0; --text-3: #a0adb8;
+      --green: #4ade80; --blue: #60a5fa; --red: #f87171;
+      --yellow: #fbbf24; --purple: #a78bfa; --orange: #fb923c;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-page); color: var(--text-1); min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: 9999; }
+
+    @keyframes blink     { 50% { opacity: 0; } }
+    @keyframes fade-up   { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fade-in   { from { opacity:0; } to { opacity:1; } }
+    @keyframes pulse-dot { 0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,.4); } 60% { box-shadow: 0 0 0 6px rgba(74,222,128,0); } }
+    @keyframes glow-h    { 0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,.5),0 0 10px rgba(74,222,128,.2); } 50% { box-shadow: 0 0 0 7px rgba(74,222,128,0),0 0 22px rgba(74,222,128,.5); } }
+    @keyframes draw-path { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+
+    .anim-fade-up { animation: fade-up .5s ease both; }
+    .d1{animation-delay:.05s} .d2{animation-delay:.12s} .d3{animation-delay:.19s}
+    .d4{animation-delay:.26s} .d5{animation-delay:.33s} .d6{animation-delay:.40s}
+
+    /* Header */
+    .hdr { background:var(--bg-deep); border-bottom:1px solid var(--border); padding:0 48px; display:flex; align-items:stretch; justify-content:space-between; position:sticky; top:0; z-index:100; min-height:72px; }
+    .hdr::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--green) 20%,var(--blue) 60%,transparent); opacity:.35; }
+    .hdr-left { display:flex; flex-direction:column; justify-content:center; gap:3px; }
+    .hdr-prompt { font-family:'JetBrains Mono',monospace; font-size:.68rem; font-weight:600; color:var(--green); opacity:.8; }
+    .hdr-title  { font-family:'JetBrains Mono',monospace; font-size:1.15rem; font-weight:700; color:var(--text-1); letter-spacing:-.02em; }
+    .hdr-cursor { color:var(--green); animation:blink 1.1s step-end infinite; }
+    .hdr-sub    { font-family:'JetBrains Mono',monospace; font-size:.7rem; font-weight:500; color:var(--text-3); }
+    .hdr-right  { display:flex; align-items:center; gap:6px; }
+    .hdr-pill   { font-family:'JetBrains Mono',monospace; font-size:.68rem; font-weight:700; padding:5px 12px; letter-spacing:.04em; }
+    .pill-green { color:var(--green); border:1px solid rgba(74,222,128,.3); background:rgba(74,222,128,.07); }
+    .pill-green .dot { display:inline-block; width:6px; height:6px; background:var(--green); border-radius:50%; margin-right:6px; vertical-align:middle; animation:pulse-dot 2s ease infinite; }
+    .pill-dim { color:var(--text-2); border:1px solid var(--border); background:var(--bg-card); }
+
+    /* Tabs */
+    .tabs-wrap { background:var(--bg-deep); border-bottom:1px solid var(--border); padding:0 40px; display:flex; position:sticky; top:72px; z-index:99; }
+    .tab { color:var(--text-3); font-family:'JetBrains Mono',monospace; font-size:.78rem; font-weight:700; letter-spacing:.04em; padding:14px 24px; cursor:pointer; border-bottom:2px solid transparent; transition:color .2s,border-color .2s,background .2s; user-select:none; }
+    .tab:hover { color:var(--text-1); background:rgba(255,255,255,.02); }
+    .tab.active { color:var(--text-1); border-bottom-color:var(--green); background:rgba(74,222,128,.04); }
+    .tab-num { color:var(--green); margin-right:9px; font-size:.65rem; opacity:.7; }
+    .tab.active .tab-num { opacity:1; }
+
+    /* Pages */
+    .page { display:none; background:var(--bg-page); }
+    .page.active { display:block; }
+    .page-inner { max-width:1100px; margin:0 auto; padding:40px 28px 60px; }
+    .sec { margin-bottom:52px; }
+    .sec-label { font-family:'JetBrains Mono',monospace; font-size:.68rem; font-weight:700; color:var(--green); letter-spacing:.1em; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
+    .sec-label::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); max-width:180px; }
+
+    /* Metrics */
+    .metrics-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+    .metric { background:var(--bg-card); border:1px solid var(--border); border-top:2px solid transparent; padding:20px 16px 18px; position:relative; overflow:hidden; transition:border-color .2s,transform .2s; }
+    .metric::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(96,165,250,.04) 0%,transparent 60%); pointer-events:none; }
+    .metric:hover { transform:translateY(-2px); border-color:var(--border-hi); }
+    .m-blue{border-top-color:var(--blue)} .m-green{border-top-color:var(--green)}
+    .m-red{border-top-color:var(--red)}   .m-yellow{border-top-color:var(--yellow)}
+    .m-purple{border-top-color:var(--purple)}
+    .metric-val { font-family:'JetBrains Mono',monospace; font-size:2rem; font-weight:700; line-height:1; }
+    .m-blue  .metric-val{color:var(--blue)}  .m-green .metric-val{color:var(--green)}
+    .m-red   .metric-val{color:var(--red)}   .m-yellow .metric-val{color:var(--yellow)}
+    .m-purple .metric-val{color:var(--purple)}
+    .metric-key { font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:700; color:var(--text-3); margin-top:10px; letter-spacing:.04em; }
+    .metric-sub { font-size:.67rem; font-weight:500; color:var(--text-2); margin-top:3px; }
+
+    /* Dev timeline */
+    .station-track-h { display:flex; align-items:center; gap:0; width:100%; background:var(--bg-card); border:1px solid var(--border); padding:24px 28px; }
+    .station-h { display:flex; flex-direction:column; align-items:center; gap:8px; min-width:120px; flex-shrink:0; }
+    .station-h-dot { width:36px; height:36px; border-radius:50%; border:2px solid var(--border); background:var(--bg-deep); display:flex; align-items:center; justify-content:center; }
+    .station-h-dot-inner { width:10px; height:10px; border-radius:50%; background:var(--border); }
+    .station-h.done .station-h-dot { border-color:rgba(96,165,250,.6); background:rgba(96,165,250,.08); }
+    .station-h.done .station-h-dot-inner { background:var(--blue); }
+    .live-h-dot { border-color:rgba(74,222,128,.75)!important; background:rgba(74,222,128,.1)!important; animation:glow-h 2.2s ease infinite; }
+    .live-h-dot .station-h-dot-inner { background:var(--green)!important; }
+    .station-h-label { font-family:'JetBrains Mono',monospace; font-size:.6rem; font-weight:700; letter-spacing:.1em; text-align:center; color:var(--text-3); }
+    .station-h-label.done{color:var(--blue)} .station-h-label.live{color:var(--green)}
+    .station-h-sub { font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:600; color:var(--text-3); text-align:center; }
+    .station-h-sub.live{color:var(--green)}
+    .station-h-rail { flex:1; height:2px; min-width:32px; background:var(--blue); opacity:.45; position:relative; top:-10px; }
+
+    /* Schedule bar */
+    .schedule-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+    .sched-day { background:var(--bg-card); border:1px solid var(--border); padding:14px 12px; text-align:center; }
+    .sched-day.active-day { border-color:var(--blue); background:rgba(96,165,250,.06); }
+    .sched-day.active-friday { border-color:var(--green); background:rgba(74,222,128,.06); }
+    .sched-name { font-family:'JetBrains Mono',monospace; font-size:.7rem; font-weight:700; color:var(--text-3); margin-bottom:6px; }
+    .sched-name.on-blue{color:var(--blue)} .sched-name.on-green{color:var(--green)}
+    .sched-label { font-size:.72rem; font-weight:600; color:var(--text-2); line-height:1.5; }
+    .sched-sub { font-family:'JetBrains Mono',monospace; font-size:.6rem; font-weight:600; color:var(--text-3); margin-top:4px; }
+
+    /* IO */
+    .io-wrap { display:flex; align-items:center; gap:16px; }
+    .sources-col { flex:1; display:flex; flex-direction:column; gap:5px; }
+    .src-row { background:var(--bg-card); border:1px solid var(--border); border-left:2px solid transparent; padding:10px 16px; display:flex; align-items:center; gap:14px; font-family:'JetBrains Mono',monospace; font-size:.72rem; transition:border-color .15s,background .15s; }
+    .src-row:hover { border-left-color:var(--red); background:#1a1f2c; }
+    .src-tag  { color:var(--red); font-weight:700; min-width:46px; }
+    .src-name { color:var(--text-1); flex:1; font-size:.7rem; font-weight:600; font-family:'Inter',sans-serif; }
+    .src-ext  { color:var(--text-2); font-size:.64rem; font-weight:700; background:var(--bg-deep); border:1px solid var(--border); padding:2px 8px; }
+    .src-badge { font-size:.6rem; font-weight:700; padding:2px 8px; background:rgba(74,222,128,.08); color:var(--green); border:1px solid rgba(74,222,128,.3); letter-spacing:.04em; }
+    .io-arrow { display:flex; flex-direction:column; align-items:center; gap:6px; padding:0 8px; flex-shrink:0; }
+    .arrow-shaft { width:2px; height:44px; background:linear-gradient(180deg,var(--border),var(--blue)); position:relative; }
+    .arrow-shaft::after { content:''; position:absolute; bottom:-5px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid var(--blue); }
+    .arrow-label { font-family:'JetBrains Mono',monospace; font-size:.6rem; font-weight:700; color:var(--blue); text-align:center; line-height:1.5; letter-spacing:.04em; }
+    .output-card { flex:1; background:var(--bg-card); border:1px solid rgba(96,165,250,.25); border-top:2px solid var(--blue); padding:20px; }
+    .output-title { font-family:'JetBrains Mono',monospace; font-size:.72rem; font-weight:700; color:var(--blue); margin-bottom:16px; }
+    .out-row { display:flex; gap:12px; margin-bottom:9px; font-size:.71rem; align-items:baseline; }
+    .out-key { font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--text-3); min-width:70px; font-size:.64rem; }
+    .out-val { font-weight:600; color:var(--text-1); }
+
+    /* Feature cards */
+    .feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .feat-card { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--blue); padding:20px; transition:transform .2s,border-color .2s; }
+    .feat-card:hover { transform:translateY(-2px); border-color:rgba(96,165,250,.6); }
+    .feat-tag   { font-family:'JetBrains Mono',monospace; font-size:.58rem; font-weight:700; color:var(--blue); letter-spacing:.14em; margin-bottom:8px; }
+    .feat-title { font-size:.84rem; font-weight:700; color:var(--text-1); margin-bottom:8px; }
+    .feat-desc  { font-size:.73rem; font-weight:500; color:var(--text-2); line-height:1.7; }
+    .feat-desc code { font-family:'JetBrains Mono',monospace; background:var(--bg-deep); color:var(--red); padding:1px 6px; font-size:.67rem; border:1px solid var(--border); }
+
+    /* Deps */
+    .dep-grid { display:flex; flex-wrap:wrap; gap:8px; }
+    .dep { background:var(--bg-card); border:1px solid var(--border); padding:8px 15px; display:flex; align-items:center; gap:10px; transition:border-color .15s; cursor:default; }
+    .dep:hover { border-color:var(--border-hi); }
+    .dep-name { font-family:'JetBrains Mono',monospace; font-size:.72rem; font-weight:700; color:var(--text-1); }
+    .dep-role { font-size:.63rem; font-weight:600; color:var(--text-3); }
+
+    /* Flowchart */
+    .flowchart-wrap { background:var(--bg-card); border:1px solid var(--border); padding:24px 16px; overflow:hidden; }
+    .fc-svg-container { width:100%; cursor:zoom-in; transition:transform .35s cubic-bezier(.25,.46,.45,.94); }
+    .fc-svg-container.zoomed { transform:scale(1.35); cursor:zoom-out; }
+    #fc-svg { display:block; width:100%; height:auto; }
+    .fc-zoom-hint { text-align:center; font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:600; color:var(--text-3); margin-top:10px; letter-spacing:.06em; }
+    .fc-node-start    { fill:#0d1e33; stroke:rgba(96,165,250,.55);  stroke-width:1.5; }
+    .fc-node-process  { fill:#131c28; stroke:#505a6e;               stroke-width:1.5; }
+    .fc-node-decision { fill:#1e1a08; stroke:rgba(202,138,4,.55);   stroke-width:1.5; }
+    .fc-node-ok       { fill:#0a1f12; stroke:rgba(74,222,128,.55);  stroke-width:1.5; }
+    .fc-node-err      { fill:#1f0d0d; stroke:rgba(248,113,113,.55); stroke-width:1.5; }
+    .fc-node-phase    { fill:#0e0b1a; stroke:rgba(167,139,250,.5);  stroke-width:1.5; }
+    .fc-t-main  { font-family:'Inter',sans-serif; font-weight:700; font-size:12px; fill:#e6edf3; }
+    .fc-t-main.start  { fill:#93c5fd; } .fc-t-main.ok    { fill:#4ade80; }
+    .fc-t-main.err    { fill:#f87171; } .fc-t-main.decide{ fill:#fbbf24; }
+    .fc-t-main.phase  { fill:#c4b5fd; }
+    .fc-t-sub   { font-family:'JetBrains Mono',monospace; font-weight:500; font-size:9px; fill:#a0adb8; }
+    .fc-edge    { fill:none; stroke:#505a6e; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+    .fc-edge-yes { stroke:rgba(74,222,128,.7); } .fc-edge-no { stroke:rgba(248,113,113,.7); }
+    .fc-edge.animated { stroke-dasharray:var(--len); stroke-dashoffset:var(--len); }
+    .fc-edge.animated.run { animation:draw-path .6s ease forwards; }
+    .fc-label-yes { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:9px; fill:#4ade80; }
+    .fc-label-no  { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:9px; fill:#f87171; }
+
+    /* Error grid */
+    .err-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .err-card { background:var(--bg-card); border:1px solid var(--border); padding:18px 20px; }
+    .err-title { font-size:.83rem; font-weight:700; color:var(--text-1); margin-bottom:8px; }
+    .err-desc  { font-size:.73rem; font-weight:500; color:var(--text-2); line-height:1.65; }
+    .err-desc code { font-family:'JetBrains Mono',monospace; background:var(--bg-deep); color:var(--red); padding:1px 6px; font-size:.67rem; border:1px solid var(--border); }
+
+    /* Code cards */
+    .code-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .code-card { background:#07090e; border:1px solid var(--border); overflow:visible; cursor:pointer; }
+    .code-card:hover { border-color:var(--border-hi); }
+    .code-card-hdr { padding:10px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); background:var(--bg-card); }
+    .code-card-title { font-size:.72rem; font-weight:700; color:var(--text-1); }
+    .code-tag { font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:700; padding:2px 9px; background:rgba(74,222,128,.08); color:var(--green); border:1px solid rgba(74,222,128,.3); }
+    pre { padding:16px; font-size:.71rem; line-height:1.78; color:var(--text-1); overflow-x:auto; font-family:'JetBrains Mono','Cascadia Code',monospace; font-weight:500; }
+    .kw{color:#f472b6;font-weight:700} .vr{color:var(--blue)} .st{color:#86efac}
+    .cm{color:#4d5a6a;font-style:italic} .nm{color:var(--orange)}
+    .type-cursor { display:inline-block; width:2px; height:1em; background:var(--green); vertical-align:text-bottom; margin-left:1px; animation:blink .9s step-end infinite; }
+
+    /* Convo cards */
+    .convo-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .convo-card { background:var(--bg-card); border:1px solid var(--border); overflow:hidden; cursor:pointer; }
+    .convo-card:hover { border-color:var(--border-hi); }
+    .convo-hdr  { padding:11px 18px; background:var(--bg-deep); border-bottom:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:.7rem; font-weight:700; color:var(--blue); letter-spacing:.03em; }
+    .convo-body { padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+    .msg { display:flex; gap:10px; align-items:flex-start; opacity:0; transform:translateY(6px); transition:opacity .25s ease,transform .25s ease; }
+    .msg.visible { opacity:1; transform:translateY(0); }
+    .avatar { width:26px; height:26px; font-family:'JetBrains Mono',monospace; font-size:.6rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .avatar-u { background:rgba(96,165,250,.12); color:var(--blue);   border:1px solid rgba(96,165,250,.35); }
+    .avatar-c { background:rgba(251,191,36,.1);  color:var(--yellow); border:1px solid rgba(251,191,36,.3);  }
+    .bubble   { font-size:.76rem; font-weight:500; line-height:1.65; color:var(--text-1); background:var(--bg-page); border:1px solid var(--border); padding:8px 12px; flex:1; }
+    .bubble-c { background:#100f09; border-color:rgba(251,191,36,.2); }
+    .bubble code { font-family:'JetBrains Mono',monospace; background:var(--bg-deep); color:var(--red); padding:1px 5px; font-size:.66rem; border:1px solid var(--border); }
+
+    /* Responsive */
+    @media (max-width:768px) {
+      .hdr { padding:0 20px; flex-wrap:wrap; align-content:center; gap:6px; }
+      .hdr-prompt { display:none; }
+      .hdr-right { flex-wrap:wrap; gap:4px; }
+      .hdr-title { font-size:.95rem; }
+      .tabs-wrap { padding:0 12px; }
+      .tab { font-size:.7rem; padding:12px 14px; }
+      .page-inner { padding:24px 16px 48px; }
+      .metrics-row { grid-template-columns:repeat(3,1fr); }
+      .schedule-bar { grid-template-columns:repeat(3,1fr); }
+      .io-wrap { flex-direction:column; gap:12px; }
+      .feat-grid,.err-grid,.code-grid,.convo-grid { grid-template-columns:1fr; }
+      .station-track-h { flex-wrap:wrap; padding:16px 12px; row-gap:20px; }
+      .station-h { min-width:calc(50% - 8px); }
+      .station-h-rail { display:none; }
+    }
+
+    footer { text-align:center; padding:20px 24px; font-family:'JetBrains Mono',monospace; font-size:.67rem; font-weight:600; color:var(--text-3); border-top:1px solid var(--border); background:var(--bg-deep); letter-spacing:.04em; }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-left">
+    <span class="hdr-prompt">~/projects/osd-weekly-report</span>
+    <h1 class="hdr-title">osd_weekly_report<span class="hdr-cursor">_</span></h1>
+    <p class="hdr-sub">OS&amp;D weekly missing item automation &nbsp;·&nbsp; Python &nbsp;·&nbsp; POP3 → XLSX → SMTP</p>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-pill pill-green"><span class="dot"></span>ACTIVE</span>
+    <span class="hdr-pill pill-dim">Mon–Thu &nbsp;·&nbsp; Fri</span>
+    <span class="hdr-pill pill-dim">v1.0</span>
+  </div>
+</header>
+
+<div class="tabs-wrap">
+  <div class="tab active" onclick="switchTab(0)"><span class="tab-num">01</span>Overview</div>
+  <div class="tab" onclick="switchTab(1)"><span class="tab-num">02</span>Pipeline Flow</div>
+  <div class="tab" onclick="switchTab(2)"><span class="tab-num">03</span>Code &amp; Highlights</div>
+</div>
+
+<!-- ═══ PAGE 1 — OVERVIEW ═══ -->
+<div class="page active" id="page-0">
+  <div class="page-inner">
+
+    <div class="sec">
+      <p class="sec-label">// system_metrics</p>
+      <div class="metrics-row">
+        <div class="metric m-blue anim-fade-up d1">
+          <div class="metric-val">9</div>
+          <div class="metric-key">plants_tracked</div>
+          <div class="metric-sub">per weekly cycle</div>
+        </div>
+        <div class="metric m-green anim-fade-up d2">
+          <div class="metric-val">2</div>
+          <div class="metric-key">entry_points</div>
+          <div class="metric-sub">downloader · main</div>
+        </div>
+        <div class="metric m-red anim-fade-up d3">
+          <div class="metric-val">0</div>
+          <div class="metric-key">manual_steps</div>
+          <div class="metric-sub">fully automated</div>
+        </div>
+        <div class="metric m-yellow anim-fade-up d4">
+          <div class="metric-val">15wk</div>
+          <div class="metric-key">ovg_retention</div>
+          <div class="metric-sub">rolling accumulation</div>
+        </div>
+        <div class="metric m-purple anim-fade-up d5">
+          <div class="metric-val">5wk</div>
+          <div class="metric-key">file_retention</div>
+          <div class="metric-sub">auto-pruned</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="sec-label">// weekly_schedule</p>
+      <div class="schedule-bar">
+        <div class="sched-day active-day">
+          <div class="sched-name on-blue">MON</div>
+          <div class="sched-label">Download<br>OS&amp;D Reports</div>
+          <div class="sched-sub">report_downloader.py</div>
+        </div>
+        <div class="sched-day active-day">
+          <div class="sched-name on-blue">TUE</div>
+          <div class="sched-label">Download<br>+ Validate</div>
+          <div class="sched-sub">report_downloader.py</div>
+        </div>
+        <div class="sched-day active-day">
+          <div class="sched-name on-blue">WED</div>
+          <div class="sched-label">Download<br>+ Validate</div>
+          <div class="sched-sub">report_downloader.py</div>
+        </div>
+        <div class="sched-day active-day">
+          <div class="sched-name on-blue">THU</div>
+          <div class="sched-label">Download<br>IBD Origin</div>
+          <div class="sched-sub">report_downloader.py</div>
+        </div>
+        <div class="sched-day active-friday">
+          <div class="sched-name on-green">FRI</div>
+          <div class="sched-label">IBD vs OSD<br>Missing Report</div>
+          <div class="sched-sub">main.py</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="sec-label">// dev_timeline</p>
+      <div class="station-track-h">
+        <div class="station-h done">
+          <div class="station-h-dot"><div class="station-h-dot-inner"></div></div>
+          <div class="station-h-label done">BRD REVIEW</div>
+          <div class="station-h-sub">4 hours</div>
+        </div>
+        <div class="station-h-rail"></div>
+        <div class="station-h done">
+          <div class="station-h-dot"><div class="station-h-dot-inner"></div></div>
+          <div class="station-h-label done">DEVELOPMENT</div>
+          <div class="station-h-sub">2 weeks</div>
+        </div>
+        <div class="station-h-rail"></div>
+        <div class="station-h done">
+          <div class="station-h-dot"><div class="station-h-dot-inner"></div></div>
+          <div class="station-h-label done">TESTING / QA</div>
+          <div class="station-h-sub">1 week</div>
+        </div>
+        <div class="station-h-rail"></div>
+        <div class="station-h">
+          <div class="station-h-dot live-h-dot"><div class="station-h-dot-inner"></div></div>
+          <div class="station-h-label live">GO-LIVE</div>
+          <div class="station-h-sub live">Active</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="sec-label">// data_sources → output</p>
+      <div class="io-wrap">
+        <div class="sources-col">
+          <div class="src-row anim-fade-up d1"><span class="src-tag">OS&amp;D</span><span class="src-name">Weekly OS&amp;D Report — per plant (Mon–Thu)</span><span class="src-ext">.xlsx</span><span class="src-badge">9 plants</span></div>
+          <div class="src-row anim-fade-up d2"><span class="src-tag">IBD</span><span class="src-name">IB Damage Origin — WKxx (Thu)</span><span class="src-ext">.xlsx/.xlsb</span><span class="src-badge">weekly</span></div>
+        </div>
+        <div class="io-arrow">
+          <div class="arrow-shaft"></div>
+          <div class="arrow-label">COMPARE<br>+ MATCH</div>
+        </div>
+        <div class="output-card anim-fade-up d3">
+          <div class="output-title">W## {code} Missing items from OSD Report.xlsx</div>
+          <div class="out-row"><span class="out-key">matching</span><span class="out-val">Serial Number(s) → Model + Qty fallback</span></div>
+          <div class="out-row"><span class="out-key">ovg</span><span class="out-val">OSD_OVG.xlsx — 15wk rolling, OSD schema</span></div>
+          <div class="out-row"><span class="out-key">email</span><span class="out-val">per-plant report + status summary via SMTP</span></div>
+          <div class="out-row"><span class="out-key">cleanup</span><span class="out-val">5wk file retention · auto-prune</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="sec-label">// technical_highlights</p>
+      <div class="feat-grid">
+        <div class="feat-card anim-fade-up d1">
+          <div class="feat-tag">PIPELINE</div>
+          <div class="feat-title">Shared Directory Contract</div>
+          <div class="feat-desc">Shared directory path is the only contract between the two scripts. A missing plant file adds it to <code>file_missing</code> and continues — a mid-week download failure never touches Friday's run.</div>
+        </div>
+        <div class="feat-card anim-fade-up d2">
+          <div class="feat-tag">MATCHING</div>
+          <div class="feat-title">One Pass, Two Outputs</div>
+          <div class="feat-desc">After the IBD loop, residual <code>osd_work</code> is the OVG-new set — no second scan. <code>_match_and_consume()</code> drops matched OSD rows as each IBD row is processed, producing both missing and OVG-new in one pass.</div>
+        </div>
+        <div class="feat-card anim-fade-up d3">
+          <div class="feat-tag">OVG</div>
+          <div class="feat-title">Cross-Week Deduction</div>
+          <div class="feat-desc">Same consume logic runs against the OVG file before generating the report — matched items deducted from missing. Pruning: <code>(current_week − row_week) % 52 &gt; 15</code> — modulo handles year-boundary so week 3 and week 51 compute as 4 weeks apart, not −48.</div>
+        </div>
+        <div class="feat-card anim-fade-up d4">
+          <div class="feat-tag">VALIDATION</div>
+          <div class="feat-title">Non-Blocking, Header-Aware</div>
+          <div class="feat-desc"><code>read_excel(nrows=10)</code> scans the first 10 rows for the 'O/S/D' header — row 1 is never assumed. Validation failures flag to <code>file_issues</code> and surface in the daily email without blocking the file or Friday's run.</div>
+        </div>
+        <div class="feat-card anim-fade-up d5">
+          <div class="feat-tag">SCHEMA</div>
+          <div class="feat-title">Normalize at Read, Not at Match</div>
+          <div class="feat-desc"><code>{col.strip().lower(): col}</code> lookup + <code>'serial number' in cl</code> substring match normalize all variants at read. Final slice to <code>OSD_COLS</code> drops extras including trailing <code>Unnamed:*</code>. Matching logic downstream sees one consistent schema.</div>
+        </div>
+        <div class="feat-card anim-fade-up d6">
+          <div class="feat-tag">EMAIL</div>
+          <div class="feat-title">Per-Plant Isolation</div>
+          <div class="feat-desc">Each plant runs in its own <code>try/except</code> — one failure never blocks others. Email sent only when <code>has_report=True</code>; zero-missing plants generate no email. <code>PLANT_RECIPIENTS</code> maps independent <code>{to, cc, bcc}</code> per plant.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="sec-label">// dependencies</p>
+      <div class="dep-grid">
+        <div class="dep"><span class="dep-name">python</span><span class="dep-role">runtime</span></div>
+        <div class="dep"><span class="dep-name">pandas</span><span class="dep-role">comparison / groupby</span></div>
+        <div class="dep"><span class="dep-name">openpyxl</span><span class="dep-role">excel read/write</span></div>
+        <div class="dep"><span class="dep-name">pyxlsb</span><span class="dep-role">xlsb support</span></div>
+        <div class="dep"><span class="dep-name">pytz</span><span class="dep-role">timezone handling</span></div>
+        <div class="dep"><span class="dep-name">poplib</span><span class="dep-role">pop3 inbound</span></div>
+        <div class="dep"><span class="dep-name">smtplib</span><span class="dep-role">smtp outbound</span></div>
+        <div class="dep"><span class="dep-name">python-dotenv</span><span class="dep-role">credentials</span></div>
+        <div class="dep"><span class="dep-name">claude-code</span><span class="dep-role">AI dev</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PAGE 2 — PIPELINE FLOW ═══ -->
+<div class="page" id="page-1">
+  <div class="page-inner">
+
+    <div class="sec">
+      <p class="sec-label">// execution_flow</p>
+      <div class="flowchart-wrap">
+        <div class="fc-svg-container">
+        <!--
+          Two-column layout:
+          LEFT  (cx=220): Mon–Thu — report_downloader.py
+          RIGHT (cx=640): Friday  — main.py
+          Divider at x=430
+        -->
+        <svg id="fc-svg" viewBox="0 0 860 668">
+          <defs>
+            <marker id="arr"     markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0.5 L0,6.5 L7,3.5 z" fill="#505a6e"/></marker>
+            <marker id="arr-yes" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0.5 L0,6.5 L7,3.5 z" fill="rgba(74,222,128,.85)"/></marker>
+            <marker id="arr-no"  markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0.5 L0,6.5 L7,3.5 z" fill="rgba(248,113,113,.85)"/></marker>
+          </defs>
+
+          <!-- ── DIVIDER ── -->
+          <line x1="430" y1="0" x2="430" y2="740" stroke="#2a3040" stroke-width="1" stroke-dasharray="4 4"/>
+
+          <!-- ── PHASE LABELS ── -->
+          <rect class="fc-node-phase" x="80"  y="8" width="280" height="28" rx="3"/>
+          <text class="fc-t-main phase" x="220" y="22" text-anchor="middle" dominant-baseline="middle" dy="1">Mon – Thu · report_downloader.py</text>
+          <rect class="fc-node-phase" x="460" y="8" width="360" height="28" rx="3"/>
+          <text class="fc-t-main phase" x="640" y="22" text-anchor="middle" dominant-baseline="middle" dy="1">Friday · main.py</text>
+
+          <!-- ════ LEFT SPINE (cx=220) ════ -->
+
+          <!-- POP3 Download -->
+          <line class="fc-edge animated" x1="220" y1="52" x2="220" y2="80" marker-end="url(#arr)"/>
+          <!-- Scan → Validate -->
+          <line class="fc-edge animated" x1="220" y1="132" x2="220" y2="160" marker-end="url(#arr)"/>
+          <!-- Validate → Save to disk -->
+          <line class="fc-edge animated" x1="220" y1="232" x2="220" y2="270" marker-end="url(#arr)"/>
+          <!-- Save to disk → Send email -->
+          <line class="fc-edge animated" x1="220" y1="322" x2="220" y2="360" marker-end="url(#arr)"/>
+          <!-- Send email → Repeat -->
+          <line class="fc-edge animated" x1="220" y1="412" x2="220" y2="450" marker-end="url(#arr)"/>
+
+          <!-- Left nodes -->
+          <rect class="fc-node-start" x="80"  y="52" width="280" height="28" rx="4"/>
+          <text class="fc-t-main start" x="220" y="66" text-anchor="middle" dominant-baseline="middle">POP3 Download</text>
+
+          <rect class="fc-node-process" x="80" y="80" width="280" height="52" rx="0"/>
+          <text class="fc-t-main" x="220" y="101" text-anchor="middle">Scan Mailbox (newest-first)</text>
+          <text class="fc-t-sub"  x="220" y="118" text-anchor="middle">newest-first · all-token subject match · cutoff</text>
+
+          <rect class="fc-node-process" x="80" y="160" width="280" height="72" rx="0"/>
+          <text class="fc-t-main" x="220" y="183" text-anchor="middle">Validate Each File</text>
+          <text class="fc-t-sub"  x="220" y="200" text-anchor="middle">Summary sheet · O/S/D col · D values · Qty</text>
+          <text class="fc-t-sub"  x="220" y="219" text-anchor="middle" style="fill:rgba(248,113,113,.65)">issues → flagged to file_issues</text>
+
+          <rect class="fc-node-ok" x="80" y="270" width="280" height="52" rx="0"/>
+          <text class="fc-t-main ok" x="220" y="291" text-anchor="middle">Save to Disk</text>
+          <text class="fc-t-sub"    x="220" y="308" text-anchor="middle">OSD dir · IBD dir · 5wk auto-prune</text>
+
+          <rect class="fc-node-process" x="80" y="360" width="280" height="52" rx="0"/>
+          <text class="fc-t-main" x="220" y="381" text-anchor="middle">Send Download Status Email</text>
+          <text class="fc-t-sub"  x="220" y="398" text-anchor="middle">received · pending · validation issues</text>
+
+          <rect class="fc-node-start" x="80" y="450" width="280" height="28" rx="4"/>
+          <text class="fc-t-main start" x="220" y="464" text-anchor="middle">Repeat daily Mon–Thu</text>
+
+          <!-- ════ RIGHT SPINE (cx=640) ════ -->
+
+          <!-- Load files -->
+          <line class="fc-edge animated" x1="640" y1="52" x2="640" y2="80" marker-end="url(#arr)"/>
+          <!-- IBD vs OSD -->
+          <line class="fc-edge animated" x1="640" y1="132" x2="640" y2="170" marker-end="url(#arr)"/>
+          <!-- Decision: missing? -->
+          <line class="fc-edge animated" x1="640" y1="222" x2="640" y2="248" marker-end="url(#arr)"/>
+          <!-- Yes → OVG check -->
+          <line class="fc-edge fc-edge-yes animated" x1="640" y1="288" x2="640" y2="326" marker-end="url(#arr-yes)"/>
+          <!-- No → right side bypass → into Update OVG right (center y=506+26=532) -->
+          <path class="fc-edge fc-edge-no animated" d="M 730,268 H 838 V 532 H 821" marker-end="url(#arr-no)"/>
+          <!-- OVG check → save missing -->
+          <line class="fc-edge animated" x1="640" y1="378" x2="640" y2="416" marker-end="url(#arr)"/>
+          <!-- save missing → update OVG (38px gap) -->
+          <line class="fc-edge animated" x1="640" y1="468" x2="640" y2="506" marker-end="url(#arr)"/>
+          <!-- update OVG → send emails (38px gap) -->
+          <line class="fc-edge animated" x1="640" y1="558" x2="640" y2="596" marker-end="url(#arr)"/>
+
+          <!-- Right nodes -->
+          <rect class="fc-node-start" x="460" y="52" width="360" height="28" rx="4"/>
+          <text class="fc-t-main start" x="640" y="66" text-anchor="middle" dominant-baseline="middle">Load Validated Files from Disk</text>
+
+          <rect class="fc-node-process" x="460" y="80" width="360" height="52" rx="0"/>
+          <text class="fc-t-main" x="640" y="101" text-anchor="middle">IBD vs OSD Compare — Per Plant</text>
+          <text class="fc-t-sub"  x="640" y="118" text-anchor="middle">Serial Number(s) 1:1 · Model+Qty aggregate · consume osd_work</text>
+
+          <rect class="fc-node-process" x="460" y="170" width="360" height="52" rx="0"/>
+          <text class="fc-t-main" x="640" y="191" text-anchor="middle">Identify OVG Candidates</text>
+          <text class="fc-t-sub"  x="640" y="208" text-anchor="middle">residual osd_work after IBD loop → OVG new entries</text>
+
+          <!-- Decision diamond (cy=268, half-w=90, half-h=20) -->
+          <polygon class="fc-node-decision" points="640,248 730,268 640,288 550,268"/>
+          <text class="fc-t-main decide" x="640" y="264" text-anchor="middle">Missing</text>
+          <text class="fc-t-main decide" x="640" y="280" text-anchor="middle">items?</text>
+          <text class="fc-label-yes" x="626" y="310" text-anchor="end">Yes</text>
+          <text class="fc-label-no"  x="734" y="262" text-anchor="start">No</text>
+
+          <rect class="fc-node-process" x="460" y="326" width="360" height="52" rx="0"/>
+          <text class="fc-t-main" x="640" y="347" text-anchor="middle">Check vs OVG File</text>
+          <text class="fc-t-sub"  x="640" y="364" text-anchor="middle">same consume logic · OVG deduction · remaining = final</text>
+
+          <rect class="fc-node-ok" x="460" y="416" width="360" height="52" rx="0"/>
+          <text class="fc-t-main ok" x="640" y="437" text-anchor="middle">Save Missing Report</text>
+          <text class="fc-t-sub"    x="640" y="454" text-anchor="middle">W## {code} Missing items.xlsx</text>
+
+          <rect class="fc-node-process" x="460" y="506" width="360" height="52" rx="0"/>
+          <text class="fc-t-main" x="640" y="527" text-anchor="middle">Update OVG File</text>
+          <text class="fc-t-sub"  x="640" y="544" text-anchor="middle">concat+prune · (wk-row_wk)%52 · OSD_COLS enforced</text>
+
+          <rect class="fc-node-ok" x="460" y="596" width="360" height="52" rx="0"/>
+          <text class="fc-t-main ok" x="640" y="617" text-anchor="middle">Send Emails</text>
+          <text class="fc-t-sub"    x="640" y="634" text-anchor="middle">status summary (RPA Team) · per-plant missing report + claim notice</text>
+
+        </svg>
+        </div>
+        <p class="fc-zoom-hint">click to zoom in</p>
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="sec-label">// error_handling</p>
+      <div class="err-grid">
+        <div class="err-card" style="border-left:3px solid var(--red);">
+          <div class="err-title">Missing OS&amp;D File</div>
+          <div class="err-desc">Plant skipped, added to <code>file_missing</code>. Other plants continue unaffected.</div>
+        </div>
+        <div class="err-card" style="border-left:3px solid var(--orange);">
+          <div class="err-title">File Validation Failure</div>
+          <div class="err-desc">Issue logged to <code>file_issues</code> and reported in the download status email. Processing continues with other files.</div>
+        </div>
+        <div class="err-card" style="border-left:3px solid var(--yellow);">
+          <div class="err-title">IBD File Not Found</div>
+          <div class="err-desc"><code>FileNotFoundError</code> raised. IBD is required — Friday's <code>main.py</code> exits early and logs <code>file_missing</code>.</div>
+        </div>
+        <div class="err-card" style="border-left:3px solid var(--blue);">
+          <div class="err-title">Per-Plant Processing Error</div>
+          <div class="err-desc">Each plant wrapped in <code>try/except</code>. One plant failure never blocks others — logged to <code>result.fail</code>.</div>
+        </div>
+        <div class="err-card" style="border-left:3px solid var(--purple);">
+          <div class="err-title">Column Mismatch</div>
+          <div class="err-desc">Variant names (<code>SERIAL NUMBERS</code>, <code>PLANT</code>) normalized via <code>.strip().lower()</code>. Unnamed extras silently dropped.</div>
+        </div>
+        <div class="err-card" style="border-left:3px solid var(--green);">
+          <div class="err-title">SMTP / POP3 Failure</div>
+          <div class="err-desc">Connection error logged with traceback, returns <code>False</code>. Failure alert sent with log snippet if main processing errors occur.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PAGE 3 — CODE & HIGHLIGHTS ═══ -->
+<div class="page" id="page-2">
+  <div class="page-inner">
+
+    <div class="sec">
+      <p class="sec-label">// code_highlights</p>
+      <div class="code-grid">
+
+        <div class="code-card">
+          <div class="code-card-hdr">
+            <span class="code-card-title">Download-Time Validation</span>
+            <span class="code-tag">report_downloader_example.py</span>
+          </div>
+          <pre><span class="cm"># 4-point check on every downloaded OS&D file</span>
+<span class="cm"># Runs Mon–Thu so Friday's main.py sees only clean files</span>
+raw = pd.read_excel(path, sheet_name=<span class="st">'Summary'</span>,
+                    header=<span class="kw">None</span>, nrows=<span class="nm">10</span>)
+<span class="kw">if</span> <span class="st">'O/S/D'</span> <span class="kw">not in</span> raw.iloc[<span class="nm">0</span>].values:
+    <span class="kw">return</span> [<span class="st">"'O/S/D' not found in first row"</span>]
+
+df = pd.read_excel(path, sheet_name=<span class="st">'Summary'</span>)
+values = df[osd_col].dropna().astype(str).str.strip().str.upper()
+<span class="kw">if</span> <span class="st">'D'</span> <span class="kw">not in</span> values.values:
+    <span class="kw">return</span> [<span class="st">f"No 'D' value: </span><span class="vr">{sorted(values.unique())}</span><span class="st">"</span>]
+
+<span class="cm"># rows without Serial Number must have Model + Qty</span>
+<span class="cm"># isna() alone misses empty-string cells — check both</span>
+no_sn = int((df[sn_col].isna() |
+    df[sn_col].astype(str).str.strip().eq(<span class="st">''</span>)).sum()
+) <span class="kw">if</span> sn_col <span class="kw">else</span> len(df)
+<span class="kw">if</span> no_sn > <span class="nm">0</span> <span class="kw">and</span> mat_col <span class="kw">is None</span>:
+    <span class="kw">return</span> [<span class="st">f"Material/Model missing (</span><span class="vr">{no_sn}</span><span class="st"> rows)"</span>]
+<span class="kw">if</span> mat_col <span class="kw">and</span> qty_col <span class="kw">is None</span>:
+    <span class="kw">return</span> [<span class="st">"Qty column missing"</span>]</pre>
+        </div>
+
+        <div class="code-card">
+          <div class="code-card-hdr">
+            <span class="code-card-title">Consume-Based Matching</span>
+            <span class="code-tag">main_example.py</span>
+          </div>
+          <pre><span class="cm"># Serial Number → 1:1 match, drop immediately</span>
+<span class="cm"># One OSD row cannot satisfy two IBD rows</span>
+<span class="kw">if</span> serial_num <span class="kw">and</span> serial_num_col_osd:
+    matched_idx = osd_work[
+        osd_work[serial_num_col_osd]
+        .astype(str).str.strip() == serial_num
+    ].index.tolist()
+    <span class="kw">if</span> matched_idx:
+        osd_work = osd_work.drop(
+            index=matched_idx
+        ).reset_index(drop=<span class="kw">True</span>)
+        <span class="kw">return</span> <span class="nm">0</span>, osd_work
+
+<span class="cm"># No serial number → Model + Qty aggregation</span>
+<span class="kw">if</span> material <span class="kw">and</span> mod_col_osd <span class="kw">and</span> qty_col_osd:
+    matched_idx = osd_work[
+        osd_work[mod_col_osd]
+        .astype(str).str.strip() == material
+    ].index.tolist()
+    osd_qty = sum(
+        _to_int(osd_work.loc[i, qty_col_osd])
+        <span class="kw">for</span> i <span class="kw">in</span> matched_idx
+    )
+    osd_work = osd_work.drop(
+        index=matched_idx
+    ).reset_index(drop=<span class="kw">True</span>)
+    <span class="kw">return</span> max(src_qty - osd_qty, <span class="nm">0</span>), osd_work</pre>
+        </div>
+
+        <div class="code-card">
+          <div class="code-card-hdr">
+            <span class="code-card-title">Column Schema Normalization</span>
+            <span class="code-tag">main_example.py</span>
+          </div>
+          <pre><span class="cm"># Normalize all OSD files to fixed 13-col schema</span>
+<span class="cm"># Handles: 'PLANT', 'Unnamed:13', 'SERIAL NUMBERS'</span>
+col_lower = {
+    str(c).strip().lower(): c
+    <span class="kw">for</span> c <span class="kw">in</span> df.columns
+}
+rename_map = {}
+<span class="kw">for</span> target <span class="kw">in</span> OSD_COLS:
+    tl = target.lower()
+    <span class="kw">if</span> tl <span class="kw">in</span> col_lower:
+        rename_map[col_lower[tl]] = target
+    <span class="kw">elif</span> target == <span class="st">'Serial Number(s)'</span>:
+        <span class="cm"># substring match for spelling variants</span>
+        found = next((
+            c <span class="kw">for</span> cl, c <span class="kw">in</span> col_lower.items()
+            <span class="kw">if</span> <span class="st">'serial number'</span> <span class="kw">in</span> cl
+        ), <span class="kw">None</span>)
+        <span class="kw">if</span> found:
+            rename_map[found] = target
+df = df.rename(columns=rename_map)
+df = df[[c <span class="kw">for</span> c <span class="kw">in</span> OSD_COLS <span class="kw">if</span> c <span class="kw">in</span> df.columns]]</pre>
+        </div>
+
+        <div class="code-card">
+          <div class="code-card-hdr">
+            <span class="code-card-title">OVG Accumulation + 15-Week Pruning</span>
+            <span class="code-tag">main_example.py</span>
+          </div>
+          <pre><span class="cm"># OSD 13-col schema enforced at write time</span>
+new_rows = ovg_new[OSD_COLS].copy() \
+    <span class="kw">if not</span> ovg_new.empty \
+    <span class="kw">else</span> pd.DataFrame(columns=OSD_COLS)
+
+<span class="cm"># Merge this plant's data, preserve other plants</span>
+other = existing[
+    existing[plant_col].astype(str).str.strip() != plant
+]
+combined = pd.concat(
+    [other, remaining_ovg, new_rows], ignore_index=<span class="kw">True</span>
+)
+
+<span class="cm"># Prune records older than 15 weeks (handles year wrap)</span>
+current_wk = int(week.replace(<span class="st">'W'</span>, <span class="st">''</span>))
+combined = combined[combined[<span class="st">'Week'</span>].apply(
+    <span class="kw">lambda</span> w: (current_wk - int(w)) % <span class="nm">52</span> <= <span class="nm">15</span>
+)]
+combined.to_excel(OVG_FILE, index=<span class="kw">False</span>)</pre>
+        </div>
+
+        <div class="code-card">
+          <div class="code-card-hdr">
+            <span class="code-card-title">POP3 Scan — Newest-First + Reply Filter</span>
+            <span class="code-tag">email_pipeline_example.py</span>
+          </div>
+          <pre><span class="cm"># reversed() → highest msg numbers (newest) first</span>
+<span class="cm"># Stop as soon as mail date is before cutoff</span>
+all_mails = list(reversed(mails_list))
+<span class="kw">for</span> mail <span class="kw">in</span> all_mails:
+    mail_dt = parsedate_to_datetime(
+        headers.get(<span class="st">'Date'</span>, <span class="st">''</span>)).astimezone(_tz)
+    <span class="kw">if</span> mail_dt.date() &lt; cutoff:
+        <span class="kw">break</span>
+    <span class="cm"># Reply/forward threads skipped silently</span>
+    <span class="kw">if</span> raw_subject.strip().lower().startswith(
+            (<span class="st">'re:'</span>, <span class="st">'fw:'</span>, <span class="st">'fwd:'</span>)):
+        <span class="kw">continue</span>
+    <span class="cm"># All tokens must appear in cleaned subject</span>
+    tokens = OSD_SUBJECT_TOKENS + [week, plant]
+    <span class="kw">if</span> all(t.lower() <span class="kw">in</span> clean_subject <span class="kw">for</span> t <span class="kw">in</span> tokens):
+        <span class="kw">if</span> self._save_attachments(msg, OSD_DIR):
+            found_plants.add(plant)</pre>
+        </div>
+
+        <div class="code-card">
+          <div class="code-card-hdr">
+            <span class="code-card-title">5-Week File Retention — Auto Cleanup</span>
+            <span class="code-tag">report_downloader_example.py</span>
+          </div>
+          <pre><span class="cm"># Week number extracted from filename (W## / WK##)</span>
+<span class="cm"># % 52 handles correct wrap at year boundary</span>
+<span class="kw">def</span> <span class="nm">_cleanup</span>(directory, pattern, keep):
+    <span class="kw">if not</span> directory.exists():
+        <span class="kw">return</span>
+    current_week = datetime.today().isocalendar()[<span class="nm">1</span>]
+    <span class="kw">for</span> f <span class="kw">in</span> directory.iterdir():
+        <span class="kw">if not</span> f.is_file():
+            <span class="kw">continue</span>
+        m = re.search(pattern, f.name, re.IGNORECASE)
+        <span class="kw">if not</span> m:
+            <span class="kw">continue</span>
+        file_week = int(m.group(<span class="nm">1</span>))
+        <span class="kw">if</span> (current_week - file_week) % <span class="nm">52</span> > keep:
+            f.unlink()
+
+<span class="cm"># OSD: W##, IBD: WK##, missing reports: W##</span>
+_cleanup(OSD_DIR,     <span class="st">r'W(\d+)'</span>,  KEEP_WEEKS)
+_cleanup(IBD_DIR,     <span class="st">r'WK(\d+)'</span>, KEEP_WEEKS)
+_cleanup(MISSING_DIR, <span class="st">r'W(\d+)'</span>,  KEEP_WEEKS)</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="sec">
+      <p class="sec-label">// dev_process · Claude Code Conversations</p>
+      <div class="convo-grid">
+
+        <div class="convo-card">
+          <div class="convo-hdr">Two-stage contract: DownloadResult as interface</div>
+          <div class="convo-body">
+            <div class="msg">
+              <div class="avatar avatar-u">TJ</div>
+              <div class="bubble">Two independent scripts, shared directory path as the only contract. In the scan loop, track found plants with a <code>set</code> — guard with <code>plant not in found_plants</code> so the same plant can't be saved twice across multiple matching emails. Fetch headers first with <code>top(idx, 0)</code> — only commit to <code>retr()</code> for the full email body when there's an actual subject match. Carry everything downstream needs in a <code>DownloadResult</code> dataclass: <code>downloaded_osd</code>, <code>missing_osd</code>, <code>received_times</code>, <code>file_issues</code>, <code>error</code>. That struct is the full interface — no shared mutable state between the two scripts.</div>
+            </div>
+            <div class="msg">
+              <div class="avatar avatar-c">C</div>
+              <div class="bubble bubble-c"><code>_fetch_headers()</code> calls <code>top(idx, 0)</code>, <code>_fetch_email()</code> calls <code>retr()</code> — full download only fires on a subject match. <code>found_plants: set</code> accumulates in the scan loop; the <code>break</code> after a plant match exits the inner plant loop since one email maps to one plant. <code>DownloadResult</code> is returned from <code>download()</code> and consumed directly in <code>report_downloader.py</code> — the dataclass is the only handoff.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="convo-card">
+          <div class="convo-hdr">Consume loop: tuple return, default=1, two outputs</div>
+          <div class="convo-body">
+            <div class="msg">
+              <div class="avatar avatar-u">TJ</div>
+              <div class="bubble">Pass <code>osd_work = osd.copy()</code> into the loop — never mutate the original. <code>_match_and_consume()</code> returns <code>tuple[int, pd.DataFrame]</code>: remaining qty and the updated working set in one shot. Serial Number(s): match by <code>astype(str).str.strip()</code>, drop those indices, return <code>0, osd_work</code>. Model fallback: collect all matching model indices, sum their qty with <code>_to_int(val, default=1)</code> — default is 1, not 0, so a parse failure never silently skips an item. After the IBD loop, whatever's left in <code>osd_work</code> is the OVG-new set. One pass, two outputs.</div>
+            </div>
+            <div class="msg">
+              <div class="avatar avatar-c">C</div>
+              <div class="bubble bubble-c"><code>find_new_missing()</code> re-assigns <code>osd_work</code> on every <code>_match_and_consume()</code> call — threads through the full IBD loop. <code>_to_int(default=1)</code> is the safety net: empty or non-numeric Qty cells still count as 1 missing item. The final <code>osd_work</code> returned alongside <code>missing_df</code> goes directly into <code>save_ovg()</code> as new OVG entries — no second scan needed.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="convo-card">
+          <div class="convo-hdr">OVG: first-run schema, per-plant split, % 52 prune</div>
+          <div class="convo-body">
+            <div class="msg">
+              <div class="avatar avatar-u">TJ</div>
+              <div class="bubble"><code>load_ovg_for_plant()</code> returns <code>pd.DataFrame(columns=OSD_COLS)</code> when the file doesn't exist — same schema on first run, no special-casing downstream. In <code>save_ovg()</code>: filter <code>existing[plant_col != plant]</code> to isolate other plants' rows, concat with this plant's updated block, write the full file back. Enforce <code>ovg_new[OSD_COLS].copy()</code> at write — not at read. Prune with <code>(current_week_num − int(w)) % 52 &lt;= 15</code> — the modulo handles year rollover so week 3 and week 51 compute as 4 weeks apart, not −48.</div>
+            </div>
+            <div class="msg">
+              <div class="avatar avatar-c">C</div>
+              <div class="bubble bubble-c">Empty OVG DataFrame with <code>OSD_COLS</code> on first run — <code>check_missing_against_ovg()</code> early-returns on <code>ovg.empty</code>, clean with no branching. Per-plant split in <code>save_ovg()</code> preserves all other plants on every write. <code>% 52</code> in pruning is the load-bearing line: without it, early-January weeks incorrectly flag December data as outside the 15-week retention window.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="convo-card">
+          <div class="convo-hdr">Normalize at read: col_lower dict + substring match</div>
+          <div class="convo-body">
+            <div class="msg">
+              <div class="avatar avatar-u">TJ</div>
+              <div class="bubble">Build <code>col_lower = {str(c).strip().lower(): c for c in df.columns}</code> at read — key is normalized, value is the original column name, used directly for the rename map. For <code>Serial Number(s)</code>, don't exact-match: do <code>'serial number' in cl</code> substring to catch <code>Serial Numbers</code>, <code>SERIAL NUMBER(S)</code>, any variant. Then <code>df[[c for c in OSD_COLS if c in df.columns]]</code> — that single slice enforces column order AND drops all extras including trailing <code>Unnamed:*</code>. Enforce the same <code>OSD_COLS</code> slice in <code>save_ovg()</code> at write: <code>ovg_new[OSD_COLS].copy()</code> so the OVG file never accumulates naming drift.</div>
+            </div>
+            <div class="msg">
+              <div class="avatar avatar-c">C</div>
+              <div class="bubble bubble-c">Rename map built per-file inside <code>load_osd_damage_rows()</code>. D-row filter uses <code>str.upper().isin(['D', 'DAMAGE'])</code> — handles plants that spell out "DAMAGE" instead of just "D". The ordered slice <code>[c for c in OSD_COLS if c in df.columns]</code> is deterministic: same column order regardless of source file layout. <code>OSD_COLS</code> at <code>save_ovg()</code> write means the OVG file stays clean across all weeks and plants.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  OS&amp;D Weekly Missing Report Automation &nbsp;·&nbsp; Taehun Jang &nbsp;·&nbsp; Python · Claude Code
+</footer>
+
+<script>
+  function initCodeCard(card) {
+    const pre = card.querySelector('pre');
+    if (!pre || card._typingInit) return;
+    card._typingInit = true;
+    pre.querySelectorAll('span[class]').forEach(s => { s.dataset.color = getComputedStyle(s).color; });
+    function wrapChars(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const frag = document.createDocumentFragment();
+        for (const ch of node.textContent) {
+          const s = document.createElement('span');
+          s.className = 'char'; s.textContent = ch; frag.appendChild(s);
+        }
+        node.replaceWith(frag);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        Array.from(node.childNodes).forEach(wrapChars);
+        if (node.dataset.color) {
+          node.querySelectorAll('.char:not([data-color])').forEach(c => { c.dataset.color = node.dataset.color; });
+        }
+      }
+    }
+    Array.from(pre.childNodes).forEach(wrapChars);
+    pre.querySelectorAll('.char:not([data-color])').forEach(c => { c.dataset.color = '#e6edf3'; });
+    const cursor = document.createElement('span');
+    cursor.className = 'type-cursor'; cursor.style.display = 'none';
+    pre.appendChild(cursor);
+    card._chars = Array.from(pre.querySelectorAll('.char'));
+    card._cursor = cursor; card._typing = false;
+  }
+
+  function replayCode(card) {
+    if (card._typing) return;
+    card._typing = true;
+    card._cursor.style.display = 'inline-block';
+    card._chars.forEach(c => { c.style.color = 'transparent'; });
+    const batch = Math.max(1, Math.floor(card._chars.length / 280));
+    let i = 0;
+    function tick() {
+      if (i >= card._chars.length) { card._cursor.style.display = 'none'; card._typing = false; return; }
+      for (let b = 0; b < batch && i < card._chars.length; b++, i++) {
+        card._chars[i].style.color = card._chars[i].dataset.color;
+      }
+      setTimeout(tick, 10);
+    }
+    setTimeout(tick, 80);
+  }
+
+  function initConvoCard(card) {
+    if (card._typingInit) return;
+    card._typingInit = true;
+    card._msgs = Array.from(card.querySelectorAll('.msg'));
+    card._typing = false;
+  }
+
+  function replayConvo(card) {
+    if (card._typing) return;
+    card._typing = true;
+    card._msgs.forEach(m => m.classList.remove('visible'));
+    card._msgs.forEach((m, i) => {
+      setTimeout(() => {
+        m.classList.add('visible');
+        if (i === card._msgs.length - 1) card._typing = false;
+      }, 150 + i * 480);
+    });
+  }
+
+  let page2Inited = false;
+  function initPage2() {
+    if (page2Inited) return;
+    page2Inited = true;
+    document.querySelectorAll('.code-card').forEach(initCodeCard);
+    document.querySelectorAll('.convo-card .msg').forEach(m => m.classList.add('visible'));
+    document.querySelectorAll('.convo-card').forEach(initConvoCard);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        observer.unobserve(el);
+        if (el.classList.contains('code-card'))  replayCode(el);
+        if (el.classList.contains('convo-card')) replayConvo(el);
+      });
+    }, { threshold: 0.35 });
+    document.querySelectorAll('.code-card, .convo-card').forEach(c => observer.observe(c));
+  }
+
+  function syncTabsTop() {
+    const hdr = document.querySelector('.hdr');
+    const tabs = document.querySelector('.tabs-wrap');
+    if (hdr && tabs) tabs.style.top = hdr.offsetHeight + 'px';
+  }
+  syncTabsTop();
+  window.addEventListener('resize', syncTabsTop);
+
+  function switchTab(i) {
+    document.querySelectorAll('.tab').forEach((t, j)  => t.classList.toggle('active', j === i));
+    document.querySelectorAll('.page').forEach((p, j) => p.classList.toggle('active', j === i));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (i === 2) initPage2();
+    document.querySelectorAll('.page.active .anim-fade-up').forEach(el => {
+      el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
+    });
+    if (i === 1) {
+      const edges = document.querySelectorAll('#fc-svg .fc-edge.animated');
+      edges.forEach(el => el.classList.remove('run'));
+      requestAnimationFrame(() => {
+        edges.forEach((el, idx) => {
+          const len = el.getTotalLength ? el.getTotalLength() : 100;
+          el.style.setProperty('--len', len);
+          el.style.strokeDasharray  = len;
+          el.style.strokeDashoffset = len;
+          setTimeout(() => el.classList.add('run'), idx * 80);
+        });
+      });
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.fc-svg-container');
+    const hint = document.querySelector('.fc-zoom-hint');
+    function getOrigin(e) {
+      const rect = container.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return `${((cx-rect.left)/rect.width*100).toFixed(1)}% ${((cy-rect.top)/rect.height*100).toFixed(1)}%`;
+    }
+    function toggleZoom(e) {
+      e.preventDefault();
+      const zooming = !container.classList.contains('zoomed');
+      if (zooming) container.style.transformOrigin = getOrigin(e);
+      container.classList.toggle('zoomed', zooming);
+      if (hint) hint.textContent = zooming ? 'click to zoom out' : 'click to zoom in';
+    }
+    if (container) {
+      container.addEventListener('click', toggleZoom);
+      container.addEventListener('touchstart', toggleZoom, { passive: false });
+    }
+  });
+</script>
+
+</body>
+</html>

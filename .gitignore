@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Env
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Data files
+data/*.xlsx
+data/*.xlsb
+data/*.xls
+data/*.csv
+!data/WH Info.xlsx
+!data/Recipient list_revised.xlsx
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
