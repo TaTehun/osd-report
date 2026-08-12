@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OS&D Weekly Missing Report — Portfolio</title>
+  <title>OS&D Weekly Missing Report · Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -334,8 +334,8 @@
       <p class="sec-label">// data_sources → output</p>
       <div class="io-wrap">
         <div class="sources-col">
-          <div class="src-row anim-fade-up d1"><span class="src-tag">OS&amp;D</span><span class="src-name">Weekly OS&amp;D Report — per plant (Mon–Thu)</span><span class="src-ext">.xlsx</span><span class="src-badge">9 plants</span></div>
-          <div class="src-row anim-fade-up d2"><span class="src-tag">IBD</span><span class="src-name">IB Damage Origin — WKxx (Thu)</span><span class="src-ext">.xlsx/.xlsb</span><span class="src-badge">weekly</span></div>
+          <div class="src-row anim-fade-up d1"><span class="src-tag">OS&amp;D</span><span class="src-name">Weekly OS&amp;D Report, per plant (Mon–Thu)</span><span class="src-ext">.xlsx</span><span class="src-badge">9 plants</span></div>
+          <div class="src-row anim-fade-up d2"><span class="src-tag">IBD</span><span class="src-name">IB Damage Origin, WKxx (Thu)</span><span class="src-ext">.xlsx/.xlsb</span><span class="src-badge">weekly</span></div>
         </div>
         <div class="io-arrow">
           <div class="arrow-shaft"></div>
@@ -344,7 +344,7 @@
         <div class="output-card anim-fade-up d3">
           <div class="output-title">W## {code} Missing items from OSD Report.xlsx</div>
           <div class="out-row"><span class="out-key">matching</span><span class="out-val">Serial Number(s) → Model + Qty fallback</span></div>
-          <div class="out-row"><span class="out-key">ovg</span><span class="out-val">OSD_OVG.xlsx — 15wk rolling, OSD schema</span></div>
+          <div class="out-row"><span class="out-key">ovg</span><span class="out-val">OSD_OVG.xlsx, 15wk rolling, OSD schema</span></div>
           <div class="out-row"><span class="out-key">email</span><span class="out-val">per-plant report + status summary via SMTP</span></div>
           <div class="out-row"><span class="out-key">cleanup</span><span class="out-val">5wk file retention · auto-prune</span></div>
         </div>
@@ -357,22 +357,22 @@
         <div class="feat-card anim-fade-up d1">
           <div class="feat-tag">PIPELINE</div>
           <div class="feat-title">Shared Directory Contract</div>
-          <div class="feat-desc">Shared directory path is the only contract between the two scripts. A missing plant file adds it to <code>file_missing</code> and continues — a mid-week download failure never touches Friday's run.</div>
+          <div class="feat-desc">Shared directory path is the only contract between the two scripts. A missing plant file adds it to <code>file_missing</code> and continues, so a mid-week download failure never touches Friday's run.</div>
         </div>
         <div class="feat-card anim-fade-up d2">
           <div class="feat-tag">MATCHING</div>
           <div class="feat-title">One Pass, Two Outputs</div>
-          <div class="feat-desc">After the IBD loop, residual <code>osd_work</code> is the OVG-new set — no second scan. <code>_match_and_consume()</code> drops matched OSD rows as each IBD row is processed, producing both missing and OVG-new in one pass.</div>
+          <div class="feat-desc">After the IBD loop, residual <code>osd_work</code> is the OVG-new set, with no second scan needed. <code>_match_and_consume()</code> drops matched OSD rows as each IBD row is processed, producing both missing and OVG-new in one pass.</div>
         </div>
         <div class="feat-card anim-fade-up d3">
           <div class="feat-tag">OVG</div>
           <div class="feat-title">Cross-Week Deduction</div>
-          <div class="feat-desc">Same consume logic runs against the OVG file before generating the report — matched items deducted from missing. Pruning: <code>(current_week − row_week) % 52 &gt; 15</code> — modulo handles year-boundary so week 3 and week 51 compute as 4 weeks apart, not −48.</div>
+          <div class="feat-desc">Same consume logic runs against the OVG file before generating the report, deducting matched items from missing. Pruning: <code>(current_week − row_week) % 52 &gt; 15</code>. The modulo handles the year boundary, so week 3 and week 51 compute as 4 weeks apart, not −48.</div>
         </div>
         <div class="feat-card anim-fade-up d4">
           <div class="feat-tag">VALIDATION</div>
           <div class="feat-title">Non-Blocking, Header-Aware</div>
-          <div class="feat-desc"><code>read_excel(nrows=10)</code> scans the first 10 rows for the 'O/S/D' header — row 1 is never assumed. Validation failures flag to <code>file_issues</code> and surface in the daily email without blocking the file or Friday's run.</div>
+          <div class="feat-desc"><code>read_excel(nrows=10)</code> scans the first 10 rows for the 'O/S/D' header, so row 1 is never assumed. Validation failures flag to <code>file_issues</code> and surface in the daily email without blocking the file or Friday's run.</div>
         </div>
         <div class="feat-card anim-fade-up d5">
           <div class="feat-tag">SCHEMA</div>
@@ -382,7 +382,7 @@
         <div class="feat-card anim-fade-up d6">
           <div class="feat-tag">EMAIL</div>
           <div class="feat-title">Per-Plant Isolation</div>
-          <div class="feat-desc">Each plant runs in its own <code>try/except</code> — one failure never blocks others. Email sent only when <code>has_report=True</code>; zero-missing plants generate no email. <code>PLANT_RECIPIENTS</code> maps independent <code>{to, cc, bcc}</code> per plant.</div>
+          <div class="feat-desc">Each plant runs in its own <code>try/except</code>, so one failure never blocks others. Email sent only when <code>has_report=True</code>; zero-missing plants generate no email. <code>PLANT_RECIPIENTS</code> maps independent <code>{to, cc, bcc}</code> per plant.</div>
         </div>
       </div>
     </div>
@@ -431,7 +431,7 @@
 
           <!-- ── PHASE LABELS ── -->
           <rect class="fc-node-phase" x="80"  y="8" width="280" height="28" rx="3"/>
-          <text class="fc-t-main phase" x="220" y="22" text-anchor="middle" dominant-baseline="middle" dy="1">Mon – Thu · report_downloader.py</text>
+          <text class="fc-t-main phase" x="220" y="22" text-anchor="middle" dominant-baseline="middle" dy="1">Mon–Thu · report_downloader.py</text>
           <rect class="fc-node-phase" x="460" y="8" width="360" height="28" rx="3"/>
           <text class="fc-t-main phase" x="640" y="22" text-anchor="middle" dominant-baseline="middle" dy="1">Friday · main.py</text>
 
@@ -496,7 +496,7 @@
           <text class="fc-t-main start" x="640" y="66" text-anchor="middle" dominant-baseline="middle">Load Validated Files from Disk</text>
 
           <rect class="fc-node-process" x="460" y="80" width="360" height="52" rx="0"/>
-          <text class="fc-t-main" x="640" y="101" text-anchor="middle">IBD vs OSD Compare — Per Plant</text>
+          <text class="fc-t-main" x="640" y="101" text-anchor="middle">IBD vs OSD Compare · Per Plant</text>
           <text class="fc-t-sub"  x="640" y="118" text-anchor="middle">Serial Number(s) 1:1 · Model+Qty aggregate · consume osd_work</text>
 
           <rect class="fc-node-process" x="460" y="170" width="360" height="52" rx="0"/>
@@ -545,11 +545,11 @@
         </div>
         <div class="err-card" style="border-left:3px solid var(--yellow);">
           <div class="err-title">IBD File Not Found</div>
-          <div class="err-desc"><code>FileNotFoundError</code> raised. IBD is required — Friday's <code>main.py</code> exits early and logs <code>file_missing</code>.</div>
+          <div class="err-desc"><code>FileNotFoundError</code> raised. IBD is required, so Friday's <code>main.py</code> exits early and logs <code>file_missing</code>.</div>
         </div>
         <div class="err-card" style="border-left:3px solid var(--blue);">
           <div class="err-title">Per-Plant Processing Error</div>
-          <div class="err-desc">Each plant wrapped in <code>try/except</code>. One plant failure never blocks others — logged to <code>result.fail</code>.</div>
+          <div class="err-desc">Each plant wrapped in <code>try/except</code>. One plant failure never blocks others; it's logged to <code>result.fail</code>.</div>
         </div>
         <div class="err-card" style="border-left:3px solid var(--purple);">
           <div class="err-title">Column Mismatch</div>
@@ -591,7 +591,7 @@ values = df[osd_col].dropna().astype(str).str.strip().str.upper()
     <span class="kw">return</span> [<span class="st">f"No 'D' value: </span><span class="vr">{sorted(values.unique())}</span><span class="st">"</span>]
 
 <span class="cm"># rows without Serial Number must have Model + Qty</span>
-<span class="cm"># isna() alone misses empty-string cells — check both</span>
+<span class="cm"># isna() alone misses empty-string cells; check both</span>
 no_sn = int((df[sn_col].isna() |
     df[sn_col].astype(str).str.strip().eq(<span class="st">''</span>)).sum()
 ) <span class="kw">if</span> sn_col <span class="kw">else</span> len(df)
@@ -691,7 +691,7 @@ combined.to_excel(OVG_FILE, index=<span class="kw">False</span>)</pre>
 
         <div class="code-card">
           <div class="code-card-hdr">
-            <span class="code-card-title">POP3 Scan — Newest-First + Reply Filter</span>
+            <span class="code-card-title">POP3 Scan · Newest-First + Reply Filter</span>
             <span class="code-tag">email_pipeline_example.py</span>
           </div>
           <pre><span class="cm"># reversed() → highest msg numbers (newest) first</span>
@@ -715,7 +715,7 @@ all_mails = list(reversed(mails_list))
 
         <div class="code-card">
           <div class="code-card-hdr">
-            <span class="code-card-title">5-Week File Retention — Auto Cleanup</span>
+            <span class="code-card-title">5-Week File Retention · Auto Cleanup</span>
             <span class="code-tag">report_downloader_example.py</span>
           </div>
           <pre><span class="cm"># Week number extracted from filename (W## / WK##)</span>
@@ -752,11 +752,11 @@ _cleanup(MISSING_DIR, <span class="st">r'W(\d+)'</span>,  KEEP_WEEKS)</pre>
           <div class="convo-body">
             <div class="msg">
               <div class="avatar avatar-u">TJ</div>
-              <div class="bubble">Two independent scripts, shared directory path as the only contract. In the scan loop, track found plants with a <code>set</code> — guard with <code>plant not in found_plants</code> so the same plant can't be saved twice across multiple matching emails. Fetch headers first with <code>top(idx, 0)</code> — only commit to <code>retr()</code> for the full email body when there's an actual subject match. Carry everything downstream needs in a <code>DownloadResult</code> dataclass: <code>downloaded_osd</code>, <code>missing_osd</code>, <code>received_times</code>, <code>file_issues</code>, <code>error</code>. That struct is the full interface — no shared mutable state between the two scripts.</div>
+              <div class="bubble">Two independent scripts, shared directory path as the only contract. In the scan loop, track found plants with a <code>set</code>, guarded with <code>plant not in found_plants</code> so the same plant can't be saved twice across multiple matching emails. Fetch headers first with <code>top(idx, 0)</code>, and only commit to <code>retr()</code> for the full email body when there's an actual subject match. Carry everything downstream needs in a <code>DownloadResult</code> dataclass: <code>downloaded_osd</code>, <code>missing_osd</code>, <code>received_times</code>, <code>file_issues</code>, <code>error</code>. That struct is the full interface, with no shared mutable state between the two scripts.</div>
             </div>
             <div class="msg">
               <div class="avatar avatar-c">C</div>
-              <div class="bubble bubble-c"><code>_fetch_headers()</code> calls <code>top(idx, 0)</code>, <code>_fetch_email()</code> calls <code>retr()</code> — full download only fires on a subject match. <code>found_plants: set</code> accumulates in the scan loop; the <code>break</code> after a plant match exits the inner plant loop since one email maps to one plant. <code>DownloadResult</code> is returned from <code>download()</code> and consumed directly in <code>report_downloader.py</code> — the dataclass is the only handoff.</div>
+              <div class="bubble bubble-c"><code>_fetch_headers()</code> calls <code>top(idx, 0)</code>, <code>_fetch_email()</code> calls <code>retr()</code>; full download only fires on a subject match. <code>found_plants: set</code> accumulates in the scan loop; the <code>break</code> after a plant match exits the inner plant loop since one email maps to one plant. <code>DownloadResult</code> is returned from <code>download()</code> and consumed directly in <code>report_downloader.py</code>; the dataclass is the only handoff.</div>
             </div>
           </div>
         </div>
@@ -766,11 +766,11 @@ _cleanup(MISSING_DIR, <span class="st">r'W(\d+)'</span>,  KEEP_WEEKS)</pre>
           <div class="convo-body">
             <div class="msg">
               <div class="avatar avatar-u">TJ</div>
-              <div class="bubble">Pass <code>osd_work = osd.copy()</code> into the loop — never mutate the original. <code>_match_and_consume()</code> returns <code>tuple[int, pd.DataFrame]</code>: remaining qty and the updated working set in one shot. Serial Number(s): match by <code>astype(str).str.strip()</code>, drop those indices, return <code>0, osd_work</code>. Model fallback: collect all matching model indices, sum their qty with <code>_to_int(val, default=1)</code> — default is 1, not 0, so a parse failure never silently skips an item. After the IBD loop, whatever's left in <code>osd_work</code> is the OVG-new set. One pass, two outputs.</div>
+              <div class="bubble">Pass <code>osd_work = osd.copy()</code> into the loop; never mutate the original. <code>_match_and_consume()</code> returns <code>tuple[int, pd.DataFrame]</code>: remaining qty and the updated working set in one shot. Serial Number(s): match by <code>astype(str).str.strip()</code>, drop those indices, return <code>0, osd_work</code>. Model fallback: collect all matching model indices, sum their qty with <code>_to_int(val, default=1)</code>. Default is 1, not 0, so a parse failure never silently skips an item. After the IBD loop, whatever's left in <code>osd_work</code> is the OVG-new set. One pass, two outputs.</div>
             </div>
             <div class="msg">
               <div class="avatar avatar-c">C</div>
-              <div class="bubble bubble-c"><code>find_new_missing()</code> re-assigns <code>osd_work</code> on every <code>_match_and_consume()</code> call — threads through the full IBD loop. <code>_to_int(default=1)</code> is the safety net: empty or non-numeric Qty cells still count as 1 missing item. The final <code>osd_work</code> returned alongside <code>missing_df</code> goes directly into <code>save_ovg()</code> as new OVG entries — no second scan needed.</div>
+              <div class="bubble bubble-c"><code>find_new_missing()</code> re-assigns <code>osd_work</code> on every <code>_match_and_consume()</code> call, threading through the full IBD loop. <code>_to_int(default=1)</code> is the safety net: empty or non-numeric Qty cells still count as 1 missing item. The final <code>osd_work</code> returned alongside <code>missing_df</code> goes directly into <code>save_ovg()</code> as new OVG entries, with no second scan needed.</div>
             </div>
           </div>
         </div>
@@ -780,11 +780,11 @@ _cleanup(MISSING_DIR, <span class="st">r'W(\d+)'</span>,  KEEP_WEEKS)</pre>
           <div class="convo-body">
             <div class="msg">
               <div class="avatar avatar-u">TJ</div>
-              <div class="bubble"><code>load_ovg_for_plant()</code> returns <code>pd.DataFrame(columns=OSD_COLS)</code> when the file doesn't exist — same schema on first run, no special-casing downstream. In <code>save_ovg()</code>: filter <code>existing[plant_col != plant]</code> to isolate other plants' rows, concat with this plant's updated block, write the full file back. Enforce <code>ovg_new[OSD_COLS].copy()</code> at write — not at read. Prune with <code>(current_week_num − int(w)) % 52 &lt;= 15</code> — the modulo handles year rollover so week 3 and week 51 compute as 4 weeks apart, not −48.</div>
+              <div class="bubble"><code>load_ovg_for_plant()</code> returns <code>pd.DataFrame(columns=OSD_COLS)</code> when the file doesn't exist, giving the same schema on first run with no special-casing downstream. In <code>save_ovg()</code>: filter <code>existing[plant_col != plant]</code> to isolate other plants' rows, concat with this plant's updated block, write the full file back. Enforce <code>ovg_new[OSD_COLS].copy()</code> at write, not at read. Prune with <code>(current_week_num − int(w)) % 52 &lt;= 15</code>. The modulo handles year rollover so week 3 and week 51 compute as 4 weeks apart, not −48.</div>
             </div>
             <div class="msg">
               <div class="avatar avatar-c">C</div>
-              <div class="bubble bubble-c">Empty OVG DataFrame with <code>OSD_COLS</code> on first run — <code>check_missing_against_ovg()</code> early-returns on <code>ovg.empty</code>, clean with no branching. Per-plant split in <code>save_ovg()</code> preserves all other plants on every write. <code>% 52</code> in pruning is the load-bearing line: without it, early-January weeks incorrectly flag December data as outside the 15-week retention window.</div>
+              <div class="bubble bubble-c">Empty OVG DataFrame with <code>OSD_COLS</code> on first run. <code>check_missing_against_ovg()</code> early-returns on <code>ovg.empty</code>, clean with no branching. Per-plant split in <code>save_ovg()</code> preserves all other plants on every write. <code>% 52</code> in pruning is the load-bearing line: without it, early-January weeks incorrectly flag December data as outside the 15-week retention window.</div>
             </div>
           </div>
         </div>
@@ -794,7 +794,7 @@ _cleanup(MISSING_DIR, <span class="st">r'W(\d+)'</span>,  KEEP_WEEKS)</pre>
           <div class="convo-body">
             <div class="msg">
               <div class="avatar avatar-u">TJ</div>
-              <div class="bubble">Build <code>col_lower = {str(c).strip().lower(): c for c in df.columns}</code> at read — key is normalized, value is the original column name, used directly for the rename map. For <code>Serial Number(s)</code>, don't exact-match: do <code>'serial number' in cl</code> substring to catch <code>Serial Numbers</code>, <code>SERIAL NUMBER(S)</code>, any variant. Then <code>df[[c for c in OSD_COLS if c in df.columns]]</code> — that single slice enforces column order AND drops all extras including trailing <code>Unnamed:*</code>. Enforce the same <code>OSD_COLS</code> slice in <code>save_ovg()</code> at write: <code>ovg_new[OSD_COLS].copy()</code> so the OVG file never accumulates naming drift.</div>
+              <div class="bubble">Build <code>col_lower = {str(c).strip().lower(): c for c in df.columns}</code> at read. Key is normalized, value is the original column name, used directly for the rename map. For <code>Serial Number(s)</code>, don't exact-match: do <code>'serial number' in cl</code> substring to catch <code>Serial Numbers</code>, <code>SERIAL NUMBER(S)</code>, any variant. Then <code>df[[c for c in OSD_COLS if c in df.columns]]</code>: that single slice enforces column order AND drops all extras including trailing <code>Unnamed:*</code>. Enforce the same <code>OSD_COLS</code> slice in <code>save_ovg()</code> at write: <code>ovg_new[OSD_COLS].copy()</code> so the OVG file never accumulates naming drift.</div>
             </div>
             <div class="msg">
               <div class="avatar avatar-c">C</div>

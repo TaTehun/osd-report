@@ -22,7 +22,7 @@ OSD_DIR = _BASE / 'osd report'
 IBD_DIR = _BASE / 'IB Damage'
 OVG_DIR = _BASE / 'OVG'
 
-# .env file path — holds POP3/SMTP credentials
+# .env file path, holds POP3/SMTP credentials
 ENV_PATH = Path(r'\\your-server\path\to\.env')
 
 # POP3 credentials (.env keys)
@@ -347,7 +347,7 @@ def send_status_report(sender: EmailSender, result, week: str) -> bool:
         lines += ["<b>Success:</b>"]
         for code, has_report in result.success:
             label = "Missing report attached" if has_report else "No missing items found"
-            lines += [f"&nbsp;&nbsp;ㆍ {code} — {label}"]
+            lines += [f"&nbsp;&nbsp;ㆍ {code}: {label}"]
         lines += [""]
     if result.file_missing:
         lines += ["<b>File Missing:</b>"]
@@ -355,7 +355,7 @@ def send_status_report(sender: EmailSender, result, week: str) -> bool:
         lines += [""]
     if result.fail:
         lines += ["<b>Fail:</b>"]
-        lines += [f"&nbsp;&nbsp;ㆍ {code} — {reason}" for code, reason in result.fail]
+        lines += [f"&nbsp;&nbsp;ㆍ {code}: {reason}" for code, reason in result.fail]
         lines += [""]
     lines += [f"Please find attached the OSD OVG Report for {week}.", ""]
     lines += ["Thank you"]

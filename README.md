@@ -1,6 +1,6 @@
-# OS&D Weekly Missing Report — Automation Pipeline
+# OS&D Weekly Missing Report · Automation Pipeline
 
-A weekly Python automation pipeline that downloads OS&D (Over, Short & Damage) reports and IBD Origin files from email, compares them to identify missing items, and distributes plant-level missing reports via email — with no manual steps.
+A weekly Python automation pipeline that downloads OS&D (Over, Short & Damage) reports and IBD Origin files from email, compares them to identify missing items, and distributes plant-level missing reports via email, with no manual steps.
 
 > **Visual overview:** [project-overview.html](project-overview.html)
 
@@ -12,10 +12,10 @@ Each week, plant teams submit OS&D reports to a shared mailbox, and an IBD Origi
 
 1. **Downloads** this week's OS&D report attachments and IBD Origin file from the POP3 mailbox
 2. **Validates** each downloaded OS&D file for required columns and data integrity
-3. **Compares** IBD Origin vs OS&D reports per plant — items in IBD but not in OS&D are flagged as **Missing**
-4. **Checks** Missing items against the OVG (Over/Good) accumulation file — items found in OVG are deducted
+3. **Compares** IBD Origin vs OS&D reports per plant: items in IBD but not in OS&D are flagged as **Missing**
+4. **Checks** Missing items against the OVG (Over/Good) accumulation file, deducting items found in OVG
 5. **Saves** final Missing items as plant-level Excel reports
-6. **Updates** the OVG file — new items from OS&D not in IBD are accumulated; records older than 15 weeks are pruned
+6. **Updates** the OVG file: new items from OS&D not in IBD are accumulated; records older than 15 weeks are pruned
 7. **Distributes** plant-level missing reports and a status summary via SMTP email
 
 ---
@@ -46,8 +46,8 @@ osd-weekly-report/
 
 | Source | Description |
 |--------|-------------|
-| OS&D Reports | One Excel file per plant per week — Summary sheet with O/S/D column |
-| IBD Origin | One Excel/xlsb file per week — IB Damage data with Material, Serial number, Quantity |
+| OS&D Reports | One Excel file per plant per week; Summary sheet with O/S/D column |
+| IBD Origin | One Excel/xlsb file per week; IB Damage data with Material, Serial number, Quantity |
 
 > If an OS&D file is missing for a plant, that plant is skipped and reported in the status email.
 
@@ -91,8 +91,8 @@ For each plant, IBD rows are compared against OS&D D-rows using `_match_and_cons
 
 | Condition | Matching Method |
 |-----------|----------------|
-| IBD has Serial Number | 1:1 match against OSD `Serial Number(s)` — matched OSD row is consumed |
-| IBD has no Serial Number | Match by `Material` vs OSD `Model` — OSD qty is summed and deducted |
+| IBD has Serial Number | 1:1 match against OSD `Serial Number(s)`; matched OSD row is consumed |
+| IBD has no Serial Number | Match by `Material` vs OSD `Model`; OSD qty is summed and deducted |
 
 IBD rows with remaining qty after matching → **Missing candidates**
 OSD D-rows not consumed by any IBD row → **OVG new** (OS&D has it, IBD doesn't)
@@ -107,9 +107,9 @@ Missing candidates are checked against the existing OVG file. Items found in OVG
 - OSD columns are preserved exactly: `Plant, Week, Date, Container, SN, Live/Drop, Seal in Tact, O/S/D, Model, SN QTY, Qty, Serial Number(s), WH Note`
 
 ### 5. Distribution (`sender.py`)
-- **Status summary email** — sent to the configured list with per-plant Success/Fail status and OVG report notice
-- **Plant-level report emails** — each plant's missing report is attached and sent to plant-specific recipients
-- **Failure alert** — sent if an unexpected error occurs during processing, with log snippet attached
+- **Status summary email**: sent to the configured list with per-plant Success/Fail status and OVG report notice
+- **Plant-level report emails**: each plant's missing report is attached and sent to plant-specific recipients
+- **Failure alert**: sent if an unexpected error occurs during processing, with log snippet attached
 
 ---
 
@@ -176,7 +176,7 @@ Intended to be triggered weekly (after OS&D reports are received) via Windows Ta
 
 ## Changelog
 
-### v1.0 — 2026-05-28 · Initial Release
+### v1.0 · 2026-05-28 · Initial Release
 - POP3 downloader for OS&D reports + IBD Origin
 - IBD vs OSD comparison with Serial Number and Material+Qty matching
 - OVG accumulation file (15-week rolling, OSD column schema)
